@@ -87,6 +87,7 @@ __resumeFuncStr = function resume() {
 				
 				if (
 				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex === -1 &&
 				__startPstr2Index === -1 &&
@@ -135,6 +136,7 @@ __resumeFuncStr = function resume() {
 				
 				if (
 				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startPstrIndex === -1 &&
 				__startCondIndex === -1 &&
 				__startEachIndex === -1) {
@@ -186,6 +188,7 @@ __resumeFuncStr = function resume() {
 				
 				if (
 				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex === -1 &&
 				__startPstr2Index === -1 &&
@@ -214,6 +217,7 @@ __resumeFuncStr = function resume() {
 				
 				if (
 				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex !== -1 &&
 				__startPstr2Index === -1 &&
@@ -242,6 +246,7 @@ __resumeFuncStr = function resume() {
 				
 				if (
 				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex === -1 &&
 				__startPstr2Index === -1 &&
@@ -269,6 +274,7 @@ __resumeFuncStr = function resume() {
 			else if (__i > 3 && __ch === '>' && __source[__i - 1] === '?' && __source[__i - 2] === '/' && __source[__i - 3] === '<') {
 				
 				if (
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex === -1 &&
 				__startPstr2Index === -1 &&
@@ -301,6 +307,7 @@ __resumeFuncStr = function resume() {
 				
 				if (
 				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex === -1 &&
 				__startPstr2Index === -1 &&
@@ -337,9 +344,8 @@ __resumeFuncStr = function resume() {
 					
 					if (__i > 5 && __source[__i - 5] === '\\' && __source[__i - 4] === '\\') {
 						
-						print(__source.substring(__lastIndex, __i - 4));
-						
-						if (__repeatInfo !== undefined) {
+						if (__repeatInfo !== undefined && __repeatInfo.key !== undefined) {
+							print(__source.substring(__lastIndex, __i - 4));
 							
 							__repeatTarget = __repeatInfo.target;
 							__repeatTargetName = __repeatInfo.targetName;
@@ -390,9 +396,8 @@ __resumeFuncStr = function resume() {
 					
 					else {
 						
-						print(__source.substring(__lastIndex, __i - 3));
-						
-						if (__repeatInfo !== undefined) {
+						if (__repeatInfo !== undefined && __repeatInfo.key !== undefined) {
+							print(__source.substring(__lastIndex, __i - 3));
 							
 							__repeatTarget = __repeatInfo.target;
 							__repeatTargetName = __repeatInfo.targetName;
@@ -443,6 +448,8 @@ __resumeFuncStr = function resume() {
 			else if (__ch === '>') {
 				
 				if (
+				__isIgnored !== true &&
+				(__repeatInfo === undefined || __repeatInfo.key !== undefined) &&
 				__startCodeIndex === -1 &&
 				__startPstrIndex === -1 &&
 				__startPstr2Index === -1) {
@@ -452,11 +459,20 @@ __resumeFuncStr = function resume() {
 					__startEachIndex === -1) {
 						
 						try {
-							if (eval(__source.substring(__lastIndex, __i)) === false) {
+							if (__source.substring(__lastIndex, __i).trim() === 'else') {
+								if (__lastCond === true) {
+									__isIgnored = true;
+									__isIgnoreStack.push(true);
+								} else {
+									__isIgnoreStack.push(false);
+								}
+							} else if (eval(__source.substring(__lastIndex, __i)) === false) {
 								__isIgnored = true;
 								__isIgnoreStack.push(true);
+								__lastCond = false;
 							} else {
 								__isIgnoreStack.push(false);
+								__lastCond = true;
 							}
 						} catch (e) {
 							__responseError(__sourcePath, e, __source.substring(__lastIndex, __i), __lastLine, __lastColumn, __response);
@@ -473,7 +489,6 @@ __resumeFuncStr = function resume() {
 					}
 					
 					else if (
-					__isIgnored !== true &&
 					__startCondIndex === -1 &&
 					__startEachIndex !== -1 &&
 					__source[__i - 1] !== '-') {
@@ -488,6 +503,7 @@ __resumeFuncStr = function resume() {
 							if (__repeatItemStr.indexOf(':') === -1) {
 								
 								// find first key
+								__repeatTargetFirstKey = undefined;
 								for (__repeatTargetFirstKey in __repeatTarget) {
 									if (__repeatTarget.hasOwnProperty(__repeatTargetFirstKey) === true) {
 										break;
@@ -514,6 +530,7 @@ __resumeFuncStr = function resume() {
 								__repeatItemValue = __repeatItemSplits[1];
 								
 								// find first key
+								__repeatTargetFirstKey = undefined;
 								for (__repeatTargetFirstKey in __repeatTarget) {
 									if (__repeatTarget.hasOwnProperty(__repeatTargetFirstKey) === true) {
 										break;
@@ -632,6 +649,9 @@ function __parse(__requestInfo, __sourcePath, __source, __response, self, __isNo
 	
 	// is ignored
 	__isIgnored,
+	
+	// last cond
+	__lastCond,
 	
 	// is ignore stack
 	__isIgnoreStack = [],
@@ -760,6 +780,9 @@ CPU_CLUSTERING(function() {
 	// root path
 	rootPath = config.rootPath,
 	
+	// rest uri
+	restURI = config.restURI,
+	
 	// is not using double curly brace notation
 	isNotUsingDCBN = config.isNotUsingDCBN,
 	
@@ -787,6 +810,9 @@ CPU_CLUSTERING(function() {
 			// uri
 			uri = requestInfo.uri,
 			
+			// sub uri
+			subURI = '',
+			
 			// path
 			path,
 			
@@ -813,7 +839,8 @@ CPU_CLUSTERING(function() {
 							headers : requestInfo.headers,
 							method : requestInfo.method,
 							params : requestInfo.params,
-							ip : requestInfo.ip
+							ip : requestInfo.ip,
+							subURI : subURI
 						};
 						
 						// 캐시된 파일 제공
@@ -853,6 +880,36 @@ CPU_CLUSTERING(function() {
 					}
 				});
 			};
+			
+			if (CHECK_IS_ARRAY(restURI) === true) {
+				
+				if (CHECK_IS_IN({
+					array : restURI,
+					value : uri
+				}) === true) {
+					uri = restURI + '.nsp';
+				}
+				
+				else {
+					
+					EACH(restURI, function(restURI) {
+						if (restURI + '/' === uri.substring(0, restURI.length + 1)) {
+							subURI = uri.substring(restURI.length + 1);
+							uri = restURI + '.nsp';
+							return false;
+						}
+					});
+				}
+			}
+			
+			else {
+				if (restURI === uri) {
+					uri = restURI + '.nsp';
+				} else if (restURI + '/' === uri.substring(0, restURI.length + 1)) {
+					subURI = uri.substring(restURI.length + 1);
+					uri = restURI + '.nsp';
+				}
+			}
 			
 			if (uri === '') {
 				uri = 'index.nsp';
