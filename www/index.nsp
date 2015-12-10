@@ -21,7 +21,7 @@
 	<table class="table table-striped">
 		<~ dataSet -> data >
 			<tr>
-				<td><a href="view?id={{data._id}}">{{data.title}}</a></td>
+				<td><a href="view?id={{data._id.toString()}}">{{data.title}}</a></td>
 			</tr>
 		</~>
 	</table>

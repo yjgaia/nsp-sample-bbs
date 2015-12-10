@@ -24,7 +24,7 @@
 	<p>
 		{{data.content}}
 	</p>
-	<a class="btn btn-default" href="update?id={{data._id}}">글 수정</a>
-	<a class="btn btn-danger" href="remove?id={{data._id}}">글 삭제</a>
+	<a class="btn btn-default" href="update?id={{data._id.toString()}}">글 수정</a>
+	<a class="btn btn-danger" href="remove?id={{data._id.toString()}}">글 삭제</a>
 	
 <% include('layout/bottom.nsp'); %>
