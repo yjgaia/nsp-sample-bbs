@@ -1,0 +1,55 @@
+<% include('layout/top.nsp'); %>
+
+	<%	
+		var data = self.params;
+		var id = data.id;
+		delete data.id;
+		
+		var isNew = false;
+		
+		var ObjectID = require('mongodb').ObjectID;
+		
+		require('mongodb').MongoClient.connect('mongodb://localhost:27017/nsp-sample-bbs', function(error, db) {
+		
+			var collection = db.collection('article');
+			
+			var isNotEmpty = function(str) {
+				return str !== undefined && str !== '';
+			};
+			
+			if (
+			self.method === 'POST' &&
+			isNotEmpty(data.title) === true &&
+			isNotEmpty(data.content) === true) {
+			
+				collection.updateOne({
+					_id : ObjectID(id)
+				}, {
+					$set : data
+				}, function(error) {
+					if (error === null) {
+						redirect('view?id=' + id);
+						resume();
+					}
+				});
+			}
+			
+			else {
+				collection.findOne({
+					_id : ObjectID(id)
+				}, function(error, _data) {
+					if (error === null) {
+						data = _data;
+						resume();
+					}
+				});
+			}
+		});
+		
+		pause();
+	%>
+
+	<h3>글 수정</h3>
+	<% include('form.nsp'); %>
+	
+<% include('layout/bottom.nsp'); %>

@@ -1,0 +1,30 @@
+<% include('layout/top.nsp'); %>
+
+	<%
+		var data = {};
+		var ObjectID = require('mongodb').ObjectID;
+		
+		require('mongodb').MongoClient.connect('mongodb://localhost:27017/nsp-sample-bbs', function(error, db) {
+		
+			db.collection('article').findOne({
+				_id : ObjectID(self.params.id)
+			}, function(error, _data) {
+				if (error === null) {
+					data = _data;
+					resume();
+				}
+			});
+		});
+		
+		pause();
+	%>
+
+	<a class="btn btn-primary" href="index">글 목록</a>
+	<h3>{{data.title}}</h3>
+	<p>
+		{{data.content}}
+	</p>
+	<a class="btn btn-default" href="update?id={{data._id}}">글 수정</a>
+	<a class="btn btn-danger" href="remove?id={{data._id}}">글 삭제</a>
+	
+<% include('layout/bottom.nsp'); %>

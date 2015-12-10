@@ -1,0 +1,20 @@
+<form action="{{isNew === true ? 'write' : 'update'}}" method="POST">
+	<? isNew !== true >
+		<input type="hidden" name="id" value="{{id}}">
+	</?>
+	<div class="form-group {{data.title === '' ? 'has-error' : ''}}">
+		<label class="control-label" for="write-form-title">글 제목</label>
+		<input type="text" class="form-control" id="write-form-title" placeholder="글 제목을 입력해주세요." name="title" value="{{data.title}}">
+		<? data.title === '' >
+			<span class="help-block">글 제목을 입력해주시기 바랍니다.</span>
+		</?>
+	</div>
+	<div class="form-group {{data.content === '' ? 'has-error' : ''}}">
+		<label class="control-label" for="write-form-content">글 내용</label>
+		<textarea class="form-control" id="write-form-content" name="content" rows="8">{{data.content}}</textarea>
+		<? data.content === '' >
+			<span class="help-block">글 내용을 입력해주시기 바랍니다.</span>
+		</?>
+	</div>
+	<button type="submit" class="btn btn-primary">작성완료</button>
+</form>

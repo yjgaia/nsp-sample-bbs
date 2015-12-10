@@ -1,0 +1,35 @@
+<% include('layout/top.nsp'); %>
+
+	<%
+		var id = self.params.id;
+		
+		if (self.method === 'POST') {
+			
+			var ObjectID = require('mongodb').ObjectID;
+			
+			require('mongodb').MongoClient.connect('mongodb://localhost:27017/nsp-sample-bbs', function(error, db) {
+			
+				db.collection('article').deleteOne({
+					_id : ObjectID(id)
+				}, function(error, result) {
+					if (error === null) {
+						redirect('index');
+						resume();
+					}
+				});
+			});
+			
+			pause();
+		}
+	%>
+
+	<div class="jumbotron">
+		<h2>주의</h2>
+		<p>글을 삭제하면 복구할 수 없습니다. 삭제하시겠습니까?</p>
+		<form action="remove?id={{id}}" method="POST">
+			<a class="btn btn-primary" href="view?id={{id}}">돌아가기</a>
+			<button type="submit" class="btn btn-danger">네, 삭제합니다.</button>
+		</form>
+	</div>
+	
+<% include('layout/bottom.nsp'); %>

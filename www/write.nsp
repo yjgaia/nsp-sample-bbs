@@ -1,0 +1,34 @@
+<% include('layout/top.nsp'); %>
+
+	<%
+		var data = self.params;
+		var isNew = true;
+		
+		var isNotEmpty = function(str) {
+			return str !== undefined && str !== '';
+		};
+		
+		if (
+		self.method === 'POST' &&
+		isNotEmpty(data.title) === true &&
+		isNotEmpty(data.content) === true) {
+			
+			require('mongodb').MongoClient.connect('mongodb://localhost:27017/nsp-sample-bbs', function(error, db) {
+				
+				db.collection('article').insertOne(data, function(error, result) {
+					if (error === null) {
+						data = result.ops[0];
+						redirect('view?id=' + data._id);
+						resume();
+					}
+				});
+			});
+			
+			pause();
+		}
+	%>
+
+	<h3>글 작성</h3>
+	<% include('form.nsp'); %>
+	
+<% include('layout/bottom.nsp'); %>
